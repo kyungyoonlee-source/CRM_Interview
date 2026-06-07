@@ -127,8 +127,9 @@ tbody tr:hover td{background:rgba(59,111,232,.04)}
 .iv-q{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:8px;display:flex;align-items:flex-start;gap:6px}
 .iv-q::before{content:'■';color:var(--ac);font-size:10px;margin-top:3px;flex-shrink:0}
 .iv-opts{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
-.iv-cb-wrap{display:flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--bd2);border-radius:6px;cursor:pointer;font-size:12px;color:var(--tx2);background:var(--sf)}
-.iv-cb-wrap input{accent-color:var(--ac);width:13px;height:13px;cursor:pointer}
+.iv-cb-wrap{display:flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--bd2);border-radius:6px;cursor:pointer;font-size:12px;color:var(--tx2);transition:all .15s;user-select:none;background:var(--sf)}
+.iv-cb-wrap:hover{border-color:var(--ac);color:var(--tx)}
+.iv-cb-wrap input[type=checkbox], .iv-cb-wrap input[type=radio]{accent-color:var(--ac);width:13px;height:13px;cursor:pointer}
 .iv-cb-wrap.checked{background:var(--blb);border-color:var(--bl);color:var(--bl);font-weight:600}
 .iv-radio-wrap{display:flex;gap:10px;margin-bottom:10px}
 .iv-radio-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border:1.5px solid var(--bd2);border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;background:var(--sf)}
@@ -137,10 +138,16 @@ tbody tr:hover td{background:rgba(59,111,232,.04)}
 .iv-radio-btn.temp-bad{border-color:var(--rd);color:var(--rd);background:var(--rdb)}
 .temp-dot{width:12px;height:12px;border-radius:50%;display:inline-block;flex-shrink:0}
 .temp-good-dot{background:var(--g)}.temp-mid-dot{background:var(--am)}.temp-bad-dot{background:var(--rd)}
-.iv-meta-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.iv-meta-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:16px}
 .iv-stat-section{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
 .iv-stat-title{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bd)}
 .iv-kw-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;margin:3px;cursor:default}
+
+/* INTERVIEW 기타 단독 줄바꿈 */
+.iv-cb-wrap.is-etc{flex-basis:100%;margin-top:4px;border-style:dashed;border-color:var(--ac);background:var(--blb)}
+.iv-opts{align-items:flex-start}
+.iv-etc-inline{display:flex;gap:6px;align-items:center;flex-basis:100%;margin-top:6px}
+.iv-etc-inline input[type=text]{flex:1}
 
 /* TOAST & EMPTY */
 #toasts{position:fixed;bottom:20px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:7px}
@@ -160,6 +167,7 @@ tbody tr:hover td{background:rgba(59,111,232,.04)}
 <body>
 
 <div id="app">
+<!-- SIDEBAR -->
 <nav class="sidebar">
   <div class="sb-brand">
     <div class="sb-logo"><div class="sb-logo-ico">📝</div>Storyline</div>
@@ -187,6 +195,7 @@ tbody tr:hover td{background:rgba(59,111,232,.04)}
 
 <div class="main">
 
+<!-- DASHBOARD -->
 <div class="page active" id="page-dashboard">
   <div class="topbar"><span class="tb-title">인터뷰 대시보드</span></div>
   <div class="content">
@@ -201,6 +210,7 @@ tbody tr:hover td{background:rgba(59,111,232,.04)}
   </div>
 </div>
 
+<!-- INTERVIEW RESULTS -->
 <div class="page" id="page-interview-results">
   <div class="topbar">
     <span class="tb-title">인터뷰(실태조사) 결과 리포트</span>
@@ -210,10 +220,11 @@ tbody tr:hover td{background:rgba(59,111,232,.04)}
       <input type="date" id="iv-filter-start" class="fin" style="font-size:12px;padding:5px 10px;width:130px" onchange="renderInterviewResults()">
       <span>~</span>
       <input type="date" id="iv-filter-end" class="fin" style="font-size:12px;padding:5px 10px;width:130px" onchange="renderInterviewResults()">
+      <button class="btn btn-g btn-sm" onclick="clearIvDateFilter()" style="font-size:11px;padding:4px 10px">전체</button>
     </div>
     <button class="btn btn-g btn-sm" onclick="window.print()">🖨️ 인쇄/PDF</button>
   </div>
-  <div class="content">
+  <div class="content" id="iv-results-content">
     <div id="iv-results-summary"></div>
     <div id="iv-results-charts"></div>
     <div id="iv-results-keywords"></div>
@@ -224,6 +235,7 @@ tbody tr:hover td{background:rgba(59,111,232,.04)}
 </div>
 </div>
 
+<!-- ADD INTERVIEW MODAL -->
 <div class="sov" id="sov-iv-add">
   <div class="sm sm-wide">
     <div class="smh"><span class="smt">현장 인터뷰(실태조사) 등록</span><button class="mcl" onclick="closeSov('sov-iv-add')">×</button></div>
@@ -265,6 +277,7 @@ tbody tr:hover td{background:rgba(59,111,232,.04)}
   </div>
 </div>
 
+<!-- BACKUP MODAL -->
 <div class="sov" id="sov-backup">
   <div class="sm">
     <div class="smh"><span class="smt">💾 데이터 백업 / 본서버 연동</span><button class="mcl" onclick="closeSov('sov-backup')">×</button></div>
@@ -284,6 +297,7 @@ tbody tr:hover td{background:rgba(59,111,232,.04)}
   </div>
 </div>
 
+<!-- DETAIL MODAL -->
 <div class="sov" id="sov-iv-detail">
   <div class="sm"><div class="smh"><span class="smt" id="sov-iv-detail-title"></span><button class="mcl" onclick="closeSov('sov-iv-detail')">×</button></div><div class="smb" id="sov-iv-detail-body" style="padding:0;max-height:60vh;overflow-y:auto"></div><div class="smf"><button class="btn btn-g" onclick="closeSov('sov-iv-detail')">닫기</button></div></div>
 </div>
@@ -291,8 +305,9 @@ tbody tr:hover td{background:rgba(59,111,232,.04)}
 <div id="toasts"></div>
 
 <script>
-/* ═══ 1. DATA INITIALIZATION (NO SEED DATA) ═══ */
-const KEY = 'slcrm_v9_multi'; // 본 서버와 동일한 키 사용으로 미래 호환성 확보
+/* ═══ 1. DATA INITIALIZATION ═══ */
+const KEY = 'slcrm_v9_multi'; // 본 서버와 동일한 키 사용
+const TARGET_TOTAL = 480; // 고정된 전체 기관 수 (480개)
 
 let DB = { seq: 1000, insts: [], interviews: [] };
 
@@ -308,6 +323,17 @@ function uid() { return 'x' + (DB.seq++) + '_' + Date.now(); }
 function today() { return new Date().toISOString().slice(0,10); }
 function fmt(d) { return d ? d.replace(/-/g, '.') : '—'; }
 
+/* ═══ KEYWORD EXTRACTOR ═══ */
+function extractKW(text){
+  const pre=['사진 반복','활동 불일치','로딩 오류','연령 맞춤','콘텐츠 부족','UI 개선','인쇄 기능','업로드 오류','용량 제한','자동 추천','링크 만료'];
+  const counts={};
+  pre.forEach(k=>{const c=(text.match(new RegExp(k,'gi'))||[]).length;if(c>0)counts[k]=c;});
+  const words=text.match(/[가-힣]{2,5}/g)||[];
+  const skip=new Set(['있어요','요청','기능','경우','교사','활용','기관','내용','부탁','니다','합니','해요','아요','어요','되어','에서','에는','으로','부분','현상','문제','이유','수준']);
+  words.forEach(w=>{if(!skip.has(w)&&w.length>=2)counts[w]=(counts[w]||0)+1;});
+  return Object.entries(counts).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,12);
+}
+
 /* ═══ 2. INTERVIEW QUESTION DEFINITIONS ═══ */
 const IV_YEARS_POOL = ['1년차','2년차','3년차','4년차','5년차+'];
 const IV_Q = {
@@ -322,7 +348,7 @@ const IV_Q = {
   q3_refer_who:{label:'추천 기관명을 적어주세요.', type:'text'},
   q3_feature_need:{label:'장기 활용을 위해 꼭 추가되었으면 하는 기능은?', type:'text'},
   q3_parent_sat:{label:'학부모 만족도 체감 정도는?', opts:['매우 만족','만족','보통','불만족','매우 불만족'], single:true},
-  q4_alarm_intent:{label:'알림장 앱 출시 시, 사용 의향이 있나요?', opts:['있음','없음'], single:true},
+  q4_alarm_intent:{label:'알림장 앱 출시 시, 사용 의향이 있나요?', opts:['있음','없음','잘 모르겠음'], single:true},
   q4_alarm_feature:{label:'알림장 앱 대체 시 꼭 필요한 기능은?', type:'text'},
   q5_effect:{label:'교육·컨설팅 이후 도움이 된 부분이 있나요?', type:'text'},
   q5_need_more:{label:'추가로 도움받고 싶은 부분이 있다면?', type:'text'},
@@ -339,13 +365,25 @@ const IV_SECTIONS = [
   {num:6, title:'연구원 종합 의견', keys:['q6_researcher_opinion','q6_temperature','q6_support_points','q6_extra']},
 ];
 const IV_CHART_KEYS = [
-  {key:'q2_goal', title:'2-1. 도입 목적'}, {key:'q2_satisfy', title:'2-2. 만족 부분'}, {key:'q2_regret', title:'2-3. 아쉬운 부분'}, {key:'q2_data_use', title:'2-4. 리포트 활용'},
-  {key:'q2_parent_app', title:'2-5. 부모용 어플'}, {key:'q3_edu_programs', title:'3-1. 참여 교육'}, {key:'q3_refer', title:'3-3. 추천 의향'}, {key:'q3_parent_sat', title:'3-5. 학부모 만족도'}, {key:'q4_alarm_intent', title:'4-1. 알림장 사용 의향'}
+  {key:'q2_goal',      sec:2, title:'2-1. 도입 목적(초기 기대)'},
+  {key:'q2_satisfy',   sec:2, title:'2-2. 가장 만족하는 부분'},
+  {key:'q2_regret',    sec:2, title:'2-3. 가장 아쉬운 부분'},
+  {key:'q2_data_use',  sec:2, title:'2-4. 데이터/리포트 활용 방식'},
+  {key:'q2_parent_app',sec:2, title:'2-5. 부모용 어플 활용 여부'},
+  {key:'q3_edu_programs',sec:3,title:'3-1. 참여한 교육 프로그램'},
+  {key:'q3_refer',     sec:3, title:'3-3. 타 기관 추천 의향'},
+  {key:'q3_parent_sat',sec:3, title:'3-5. 학부모 만족도'},
+  {key:'q4_alarm_intent',sec:4,title:'4-1. 알림장 앱 사용 의향'},
 ];
 const IV_TEXT_KEYS = [
-  {key:'q3_consult_need', title:'3-2. 필요 컨설팅'}, {key:'q3_feature_need', title:'3-4. 필요 기능'}, {key:'q4_alarm_feature', title:'4-2. 알림장 필요 기능'},
-  {key:'q5_effect', title:'5-1. 교육 효과'}, {key:'q5_need_more', title:'5-2. 추가 도움'}, {key:'q6_researcher_opinion', title:'6-1. 연구원 의견'},
-  {key:'q6_support_points', title:'6-2. 지원 포인트'}, {key:'q6_extra', title:'6-3. 특이사항'}
+  {key:'q3_consult_need', title:'3-2. 추가로 필요한 컨설팅'},
+  {key:'q3_feature_need', title:'3-4. 장기 활용 필요 기능'},
+  {key:'q4_alarm_feature',title:'4-2. 알림장 앱 필요 기능'},
+  {key:'q5_effect',       title:'5-1. 교육·컨설팅 도움 된 부분'},
+  {key:'q5_need_more',    title:'5-2. 추가 도움받고 싶은 부분'},
+  {key:'q6_researcher_opinion',title:'6-1. 연구원 의견(교사·원장 특징)'},
+  {key:'q6_support_points',title:'6-2. 향후 지원·개선 포인트'},
+  {key:'q6_extra',        title:'6-3. 추가 의견·특이사항'},
 ];
 
 /* ═══ 3. CORE LOGIC ═══ */
@@ -477,10 +515,10 @@ function renderDash(){
 
   document.getElementById('dash-summary').innerHTML = `
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px">
-      <div class="sc"><div class="sc-lb">전체 등록된 인터뷰</div><div class="sc-v c-ac">${total}</div></div>
-      <div class="sc"><div class="sc-lb">온도 - 좋음</div><div class="sc-v c-g">${ivG}</div></div>
-      <div class="sc"><div class="sc-lb">온도 - 보통</div><div class="sc-v c-am">${ivM}</div></div>
-      <div class="sc"><div class="sc-lb">온도 - 위험</div><div class="sc-v c-rd">${ivB}</div></div>
+      <div class="sc"><div class="sc-lb">전체 등록된 인터뷰 (480개 기준)</div><div class="sc-v c-ac">${total}</div><div class="sc-s">${Math.round(total/TARGET_TOTAL*100)}% 진행됨</div></div>
+      <div class="sc"><div class="sc-lb">온도 - 좋음</div><div class="sc-v c-g">${ivG}</div><div class="sc-s">전체 480개 중 ${Math.round(ivG/TARGET_TOTAL*100)}%</div></div>
+      <div class="sc"><div class="sc-lb">온도 - 보통</div><div class="sc-v c-am">${ivM}</div><div class="sc-s">전체 480개 중 ${Math.round(ivM/TARGET_TOTAL*100)}%</div></div>
+      <div class="sc"><div class="sc-lb">온도 - 위험</div><div class="sc-v c-rd">${ivB}</div><div class="sc-s">전체 480개 중 ${Math.round(ivB/TARGET_TOTAL*100)}%</div></div>
     </div>`;
 
   const recent = [...ivs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0, 10);
@@ -497,69 +535,274 @@ function renderDash(){
   }).join('') : `<tr><td colspan="5"><div class="empty">등록된 인터뷰가 없습니다.<br>왼쪽 <b>'+ 새 인터뷰 작성'</b> 버튼을 눌러 시작하세요.</div></td></tr>`;
 }
 
-/* ═══ 5. RENDER RESULTS ═══ */
+/* ═══ 5. RENDER RESULTS (ADVANCED UI from v9) ═══ */
 let IV_YEAR_FILTER = null;
+let CUR_IV_SCOPE = null;
+
 function setIvYearFilter(y){ IV_YEAR_FILTER = (IV_YEAR_FILTER===y)?null:y; renderInterviewResults(); }
+function clearIvDateFilter(){ document.getElementById('iv-filter-start').value=''; document.getElementById('iv-filter-end').value=''; renderInterviewResults(); }
+
+function ivYearCounts(ivs){
+  const counts={}; IV_YEARS_POOL.forEach(y=>counts[y]=0);
+  ivs.forEach(iv=>{ if(iv.iv_years){ counts[iv.iv_years]=(counts[iv.iv_years]||0)+1; } });
+  return counts;
+}
+
+function ivBarChart(ivs, ck, compact){
+  const q=IV_Q[ck.key]; if(!q) return '';
+  const opts=q.hasEtc?[...q.opts,'기타']:q.opts;
+  const counts={}; opts.forEach(o=>counts[o]=0);
+  ivs.forEach(iv=>{
+    const v=iv[ck.key];
+    if(Array.isArray(v)) v.forEach(o=>{if(counts[o]!==undefined)counts[o]++;});
+    else if(v&&counts[v]!==undefined) counts[v]++;
+  });
+  const totalR=ivs.filter(iv=>{const v=iv[ck.key];return Array.isArray(v)?v.length>0:Boolean(v);}).length;
+  const colors=['#3B6FE8','#0D9488','#16A34A','#D97706','#7C3AED','#DC2626','#EC4899','#F97316','#14B8A6'];
+  const hasEtcResponses = q.hasEtc && ivs.some(iv=>iv[ck.key+'_etc']);
+  const fs = compact?'11px':'12px';
+  
+  return `<div class="iv-stat-section" style="${compact?'padding:12px;margin-bottom:10px':''}">
+    <div class="iv-stat-title" style="${compact?'font-size:12px':''}">${ck.title}
+      <span style="font-size:10px;color:var(--tx3);font-weight:400">(응답 ${totalR}건 / 전체 ${TARGET_TOTAL}개 기준)</span>
+      ${hasEtcResponses?`<button class="btn btn-xs btn-g" style="float:right;font-size:9px;padding:2px 7px" onclick="showIvEtcModal('${ck.key}','${ck.title.replace(/'/g,'')}')">기타 상세 보기</button>`:''}
+    </div>
+    ${opts.map((opt,i)=>{
+      const c=counts[opt]||0, p=Math.round(c/TARGET_TOTAL*100);
+      const col=colors[i%colors.length];
+      return`<div class="bcr"><div class="bcr-l"><span style="font-size:${fs}">${opt}</span><span style="font-size:11px">${c}건 (${p}%)</span></div><div class="bcr-t"><div class="bcr-f" style="width:${Math.max(p,c>0?2:0)}%;background:${col}"></div></div></div>`;
+    }).join('')}
+  </div>`;
+}
 
 function renderInterviewResults(){
   let ivs = DB.interviews || [];
   
   // Date Filter
-  const sd=document.getElementById('iv-filter-start').value, ed=document.getElementById('iv-filter-end').value;
+  const sd=document.getElementById('iv-filter-start')?.value, ed=document.getElementById('iv-filter-end')?.value;
   if(sd) ivs = ivs.filter(i=>i.date>=sd);
   if(ed) ivs = ivs.filter(i=>i.date<=ed);
 
   // Year Filter
-  const yc = {}; IV_YEARS_POOL.forEach(y=>yc[y]=0);
-  ivs.forEach(iv=>{ if(iv.iv_years) yc[iv.iv_years] = (yc[iv.iv_years]||0)+1; });
+  const yc = ivYearCounts(ivs);
   if(IV_YEAR_FILTER) ivs = ivs.filter(i=>i.iv_years===IV_YEAR_FILTER);
 
+  CUR_IV_SCOPE = ivs;
   const total = ivs.length;
-  const sumEl = document.getElementById('iv-results-summary');
-  sumEl.innerHTML = `<div style="margin-bottom:16px;display:flex;gap:6px;flex-wrap:wrap">
-    <button class="btn btn-xs ${!IV_YEAR_FILTER?'btn-p':'btn-g'}" onclick="setIvYearFilter(null)">전체보기 (${(DB.interviews||[]).length})</button>
-    ${IV_YEARS_POOL.map(y=>`<button class="btn btn-xs ${IV_YEAR_FILTER===y?'btn-p':'btn-g'}" onclick="setIvYearFilter('${y}')">${y}: ${yc[y]}개</button>`).join('')}
-  </div>`;
 
-  if(total===0){
-    document.getElementById('iv-results-charts').innerHTML = '<div class="empty panel" style="padding:40px">조건에 맞는 데이터가 없습니다.</div>';
-    document.getElementById('iv-results-list').innerHTML=''; return;
+  const sumEl = document.getElementById('iv-results-summary');
+  if(sumEl){
+    const tempG=ivs.filter(iv=>iv.q6_temperature==='좋음').length;
+    const tempM=ivs.filter(iv=>iv.q6_temperature==='보통').length;
+    const tempB=ivs.filter(iv=>iv.q6_temperature==='위험').length;
+    sumEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px">
+      <div class="sc"><div class="sc-lb">전체 인터뷰 (480개 기준)</div><div class="sc-v c-ac">${total}</div><div class="sc-s">${Math.round(total/TARGET_TOTAL*100)}% 진행됨${IV_YEAR_FILTER?' · '+IV_YEAR_FILTER+' 필터':''}</div></div>
+      <div class="sc"><div class="sc-lb">기관 온도 — 좋음</div><div class="sc-v" style="color:var(--g)">${tempG}</div><div class="sc-s">전체 480개 중 ${Math.round(tempG/TARGET_TOTAL*100)}%</div></div>
+      <div class="sc"><div class="sc-lb">기관 온도 — 보통</div><div class="sc-v" style="color:var(--am)">${tempM}</div><div class="sc-s">전체 480개 중 ${Math.round(tempM/TARGET_TOTAL*100)}%</div></div>
+      <div class="sc"><div class="sc-lb">기관 온도 — 위험</div><div class="sc-v" style="color:var(--rd)">${tempB}</div><div class="sc-s">전체 480개 중 ${Math.round(tempB/TARGET_TOTAL*100)}%</div></div>
+    </div>`;
   }
 
-  // Charts
-  const chartHtml = IV_CHART_KEYS.map(ck=>{
-    const q=IV_Q[ck.key]; const opts=q.hasEtc?[...q.opts,'기타']:q.opts;
-    const counts={}; opts.forEach(o=>counts[o]=0);
-    ivs.forEach(iv=>{ const v=iv[ck.key]; if(Array.isArray(v)) v.forEach(o=>{if(counts[o]!==undefined)counts[o]++;}); else if(v&&counts[v]!==undefined) counts[v]++; });
-    const totR = ivs.filter(iv=>{const v=iv[ck.key];return Array.isArray(v)?v.length>0:Boolean(v);}).length;
-    
-    return `<div class="iv-stat-section">
-      <div class="iv-stat-title">${ck.title} <span style="font-weight:400;font-size:10px;color:var(--tx3)">(응답 ${totR}건)</span></div>
-      ${opts.map((opt,i)=>{
-        const c=counts[opt]||0, p=totR?Math.round(c/totR*100):0;
-        return`<div class="bcr"><div class="bcr-l"><span style="font-size:11px">${opt}</span><span style="font-size:10px">${c}건 (${p}%)</span></div><div class="bcr-t"><div class="bcr-f" style="width:${Math.max(p,c>0?2:0)}%;background:var(--ac)"></div></div></div>`;
-      }).join('')}
-    </div>`;
+  const chartsEl=document.getElementById('iv-results-charts');
+  const kwEl=document.getElementById('iv-results-keywords');
+  const listEl=document.getElementById('iv-results-list');
+
+  if(total===0){
+    if(chartsEl) chartsEl.innerHTML=`<div class="panel"><div class="pb"><div class="empty">선택한 조건의 인터뷰 데이터가 없습니다.<br><small>새 인터뷰 작성 버튼을 눌러 데이터를 추가해주세요.</small></div></div></div>`;
+    if(kwEl)kwEl.innerHTML='';
+    if(listEl)listEl.innerHTML='';
+    return;
+  }
+
+  // 1. 기본 정보 칩 영역
+  const yearChips=Object.keys(yc).map(y=>{
+    const active=IV_YEAR_FILTER===y;
+    return `<button class="btn btn-xs ${active?'btn-p':'btn-g'}" style="font-size:11px" onclick="setIvYearFilter('${y}')">${y}: ${yc[y]}개</button>`;
+  }).join(' ');
+  const allChipActive = !IV_YEAR_FILTER;
+
+  // 문항 정렬 헬퍼
+  function qOrder(title){
+    const m=String(title).match(/(\d+)\s*-\s*(\d+)/);
+    if(m) return parseInt(m[1])*100+parseInt(m[2]);
+    const m2=String(title).match(/(\d+)/);
+    return m2?parseInt(m2[1])*100:9999;
+  }
+
+  const merged=[
+    ...IV_CHART_KEYS.map(ck=>({type:'chart', key:ck.key, title:ck.title, order:qOrder(ck.title)})),
+    ...IV_TEXT_KEYS.map(tk=>({type:'text', key:tk.key, title:tk.title, order:qOrder(tk.title)})),
+  ].sort((a,b)=>a.order-b.order);
+
+  // 주관식 응답 수집 헬퍼
+  function collectEtc(key){
+    return ivs.filter(iv=>iv[key+'_etc']&&String(iv[key+'_etc']).trim()).map(iv=>{
+      const inst=DB.insts.find(i=>i.id===iv.iid); return {name:inst?inst.name:'—', date:iv.date, text:iv[key+'_etc']};
+    });
+  }
+  function collectReasonBy(key, optVals){
+    return ivs.filter(iv=>{
+      const v=iv[key];
+      const matched = Array.isArray(v)?v.some(x=>optVals.includes(x)):optVals.includes(v);
+      return matched && iv[key+'_reason']&&String(iv[key+'_reason']).trim();
+    }).map(iv=>{
+      const inst=DB.insts.find(i=>i.id===iv.iid);
+      return {name:inst?inst.name:'—', date:iv.date, text:iv[key+'_reason'], choice:Array.isArray(iv[key])?iv[key].join(','):iv[key]};
+    });
+  }
+  function collectText(key){
+    return ivs.filter(iv=>iv[key]&&String(iv[key]).trim()).map(iv=>{
+      const inst=DB.insts.find(i=>i.id===iv.iid); return {name:inst?inst.name:'—', date:iv.date, text:iv[key]};
+    });
+  }
+  function respListHtml(arr, limit){
+    if(!arr.length) return '<div style="font-size:11px;color:var(--tx3);padding:8px 0">응답 없음</div>';
+    return arr.slice(0,limit||5).map(r=>`<div style="padding:7px 10px;background:var(--sf2);border-radius:6px;margin-bottom:5px">
+      <div style="font-size:10px;color:var(--tx3);margin-bottom:2px">${r.name} · ${fmt(r.date)}${r.choice?' · <span style="color:var(--bl)">'+r.choice+'</span>':''}</div>
+      <div style="font-size:12px;color:var(--tx);line-height:1.5">${r.text}</div>
+    </div>`).join('');
+  }
+
+  const FULLWIDTH_CHART = ['q2_goal','q2_satisfy','q2_regret','q2_data_use','q2_parent_app'];
+  const MULTILINE_TEXT = ['q5_effect','q5_need_more','q6_researcher_opinion','q6_support_points','q6_extra'];
+
+  const cards=merged.map(item=>{
+    if(item.type==='chart'){
+      if(FULLWIDTH_CHART.includes(item.key)){
+        const chart = ivBarChart(ivs,{key:item.key,title:item.title},false);
+        let rightTitle='', rightBody='', etcBtn='';
+        if(item.key==='q2_parent_app'){
+          const selReason=collectReasonBy(item.key,['선택적 활용 중']);
+          const noReason=collectReasonBy(item.key,['사용 안함']);
+          rightTitle='선택적 활용 중 / 사용 안함 이유';
+          rightBody=`<div style="font-size:11px;font-weight:700;color:var(--am);margin:4px 0">선택적 활용 중 (${selReason.length})</div>${respListHtml(selReason,3)}
+            <div style="font-size:11px;font-weight:700;color:var(--rd);margin:8px 0 4px">사용 안함 (${noReason.length})</div>${respListHtml(noReason,3)}`;
+        } else {
+          const etc=collectEtc(item.key);
+          rightTitle=`'기타' 주관식 응답 (${etc.length})`;
+          rightBody=respListHtml(etc,5);
+          etcBtn=`<button class="btn btn-xs btn-g" style="font-size:9px;padding:2px 8px" onclick="showIvEtcModal('${item.key}','${item.title.replace(/'/g,'')}')">주관식 자세히보기</button>`;
+        }
+        return `<div class="iv-stat-section" style="grid-column:span 2">
+          <div class="iv-stat-title">${item.title}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div>${chart}</div>
+            <div style="border-left:1px solid var(--bd);padding-left:16px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <span style="font-size:12px;font-weight:700;color:var(--tx2)">${rightTitle}</span>
+                ${etcBtn}
+              </div>
+              ${rightBody}
+            </div>
+          </div>
+        </div>`;
+      }
+      return ivBarChart(ivs,{key:item.key,title:item.title},false);
+    } else {
+      const resp=collectText(item.key);
+      if(MULTILINE_TEXT.includes(item.key)){
+        return `<div class="iv-stat-section">
+          <div class="iv-stat-title">${item.title}
+            <button class="btn btn-xs btn-g" style="float:right;font-size:9px;padding:2px 8px" onclick="showIvTextModal('${item.key}','${item.title.replace(/'/g,'')}')">상세 보기 (${resp.length})</button>
+          </div>
+          ${respListHtml(resp,6)}
+        </div>`;
+      }
+      const sample=resp.length?(resp[0].text.length>70?resp[0].text.slice(0,70)+'…':resp[0].text):'(응답 없음)';
+      return `<div class="iv-stat-section">
+        <div class="iv-stat-title">${item.title}
+          <button class="btn btn-xs btn-g" style="float:right;font-size:9px;padding:2px 8px" onclick="showIvTextModal('${item.key}','${item.title.replace(/'/g,'')}')">상세 보기 (${resp.length})</button>
+        </div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.6">${sample}</div>
+        <div style="font-size:10px;color:var(--tx3);margin-top:8px">주관식 누적 ${resp.length}건</div>
+      </div>`;
+    }
   }).join('');
 
-  // Texts
-  const textHtml = IV_TEXT_KEYS.map(tk=>{
-    const resp = ivs.filter(iv=>iv[tk.key]&&String(iv[tk.key]).trim());
-    const list = resp.slice(0,5).map(r=>{
-      const inst=DB.insts.find(i=>i.id===r.iid);
-      return `<div style="padding:6px 10px;background:var(--sf2);border-radius:6px;margin-bottom:5px"><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">${inst?inst.name:'—'}</div><div style="font-size:12px;color:var(--tx)">${r[tk.key]}</div></div>`;
-    }).join('');
-    return `<div class="iv-stat-section"><div class="iv-stat-title">${tk.title} (${resp.length}건)</div>${list||'<div class="empty" style="padding:10px">응답 없음</div>'}</div>`;
-  }).join('');
+  chartsEl.innerHTML=`
+    <div class="iv-stat-section">
+      <div class="iv-stat-title">문항 1. 인터뷰 기본 정보</div>
+      <div style="font-size:11px;color:var(--tx3);margin-bottom:6px">스토리라인 연차 <span style="color:var(--bl)">(클릭 시 하단 목록 필터링)</span></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-xs ${allChipActive?'btn-p':'btn-g'}" style="font-size:11px" onclick="setIvYearFilter(null)">전체</button>
+        ${yearChips}
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:18px 0 10px">
+      <span style="font-size:13px;font-weight:700;color:var(--tx)">문항 2~6. 응답 분석 (문항 번호순 통합)</span>
+      <button class="btn btn-sm btn-p" style="font-size:11px" onclick="showIvAllTextModal()">전체 주관식 누적 보기 →</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">${cards}</div>
+  `;
 
-  document.getElementById('iv-results-charts').innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">${chartHtml}${textHtml}</div>`;
+  // Keyword
+  const textKeys=['q2_regret_text','q2_data_use_text','q2_parent_app_text','q3_consult_need','q3_feature_need','q3_parent_sat_text','q4_alarm_feature','q5_effect','q5_need_more','q6_researcher_opinion','q6_support_points','q6_extra','q2_goal_etc','q2_satisfy_etc','q2_regret_etc','q2_data_use_etc','q3_edu_programs_etc'];
+  const allText=ivs.map(iv=>textKeys.map(k=>iv[k]||'').join(' ')).join(' ');
+  const kws=extractKW(allText);
+  if(kwEl&&kws.length){
+    const kwC=[['rgba(59,111,232,.1)','#3B6FE8'],['rgba(13,148,136,.1)','#0D9488'],['rgba(220,38,38,.1)','#DC2626'],['rgba(22,163,74,.1)','#16A34A'],['rgba(124,58,237,.1)','#7C3AED']];
+    kwEl.innerHTML=`<div class="iv-stat-section"><div class="iv-stat-title">주관식 응답 키워드 분석</div>
+      <div style="display:flex;flex-wrap:wrap;gap:7px">
+        ${kws.map((k,i)=>{const[bg,cl]=kwC[i%5],s=Math.max(11,Math.min(16,11+k[1]));return`<span class="iv-kw-badge" style="background:${bg};color:${cl};font-size:${s}px">${k[0]} <strong>${k[1]}</strong></span>`;}).join('')}
+      </div></div>`;
+  } else if(kwEl) kwEl.innerHTML='';
 
   // List
-  const rows = ivs.sort((a,b)=>b.date.localeCompare(a.date)).map(iv=>{
-    const inst=DB.insts.find(i=>i.id===iv.iid);
-    return `<tr><td style="font-size:11px">${fmt(iv.date)}</td><td style="font-weight:600">${inst?inst.name:'—'}</td><td>${iv.iv_years||'—'}</td><td>${iv.interviewer||'—'}</td><td>${iv.q6_temperature||'—'}</td></tr>`;
-  }).join('');
-  document.getElementById('iv-results-list').innerHTML = `<div class="panel" style="margin-top:14px"><div class="ph"><span class="pt">인터뷰 목록</span></div><div class="tw"><table><thead><tr><th>일시</th><th>기관명</th><th>연차</th><th>진행자</th><th>온도</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  if(listEl){
+    const sorted=[...ivs].sort((a,b)=>b.date.localeCompare(a.date));
+    const rows=sorted.map(iv=>{
+      const inst=DB.insts.find(i=>i.id===iv.iid);
+      const tempDC=iv.q6_temperature==='좋음'?'temp-good-dot':iv.q6_temperature==='위험'?'temp-bad-dot':'temp-mid-dot';
+      const tempHtml=iv.q6_temperature?'<span style="display:flex;align-items:center;gap:4px"><span class="temp-dot '+tempDC+'"></span>'+iv.q6_temperature+'</span>':'';
+      const goalTxt=Array.isArray(iv.q2_goal)?iv.q2_goal.join(', '):(iv.q2_goal||'—');
+      const tdStyle='font-size:11px;color:var(--tx2);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+      return `<tr>
+        <td style="font-size:11px;color:var(--tx3);white-space:nowrap">${fmt(iv.date)}</td>
+        <td style="font-weight:600">${inst?inst.name:'—'}</td>
+        <td style="font-size:12px">${iv.iv_years||'—'}</td>
+        <td style="font-size:12px">${iv.interviewer||'—'}</td>
+        <td>${tempHtml}</td>
+        <td style="${tdStyle}">${goalTxt}</td>
+        <td style="${tdStyle}" title="${iv.q6_researcher_opinion||''}">${iv.q6_researcher_opinion||'—'}</td>
+      </tr>`;
+    }).join('');
+    listEl.innerHTML=`<div class="iv-stat-section"><div class="iv-stat-title">기관별 인터뷰 목록 (${total}건)${IV_YEAR_FILTER?' — '+IV_YEAR_FILTER+' 필터 적용 중':''}</div>
+      <div class="tw"><table><thead><tr><th>일시</th><th>기관명</th><th>연차</th><th>진행자</th><th>온도</th><th>도입목적</th><th>연구원 의견</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+    </div>`;
+  }
+}
+
+// 모달 오픈 헬퍼
+function showIvEtcModal(key, title){
+  const ivs = CUR_IV_SCOPE || DB.interviews || [];
+  const responses = ivs.filter(iv=>iv[key+'_etc']).map(iv=>{
+    const inst=DB.insts.find(i=>i.id===iv.iid); return {name:inst?inst.name:'—', date:iv.date, text:iv[key+'_etc']};
+  });
+  const body = responses.length ? responses.map(r=>`<div style="padding:10px 12px;border-bottom:1px solid var(--bd)"><div style="font-size:11px;color:var(--tx3);margin-bottom:3px">${r.name} · ${fmt(r.date)}</div><div style="font-size:13px;color:var(--tx)">${r.text}</div></div>`).join('') : '<div class="empty">기타 응답이 없습니다</div>';
+  openIvDetailModal(`${title} — 기타 응답 (${responses.length}건)`, body);
+}
+function showIvTextModal(key, title){
+  const ivs = CUR_IV_SCOPE || DB.interviews || [];
+  const responses = ivs.filter(iv=>iv[key]&&String(iv[key]).trim()).map(iv=>{
+    const inst=DB.insts.find(i=>i.id===iv.iid); return {name:inst?inst.name:'—', date:iv.date, text:iv[key]};
+  });
+  const body = responses.length ? responses.map(r=>`<div style="padding:10px 12px;border-bottom:1px solid var(--bd)"><div style="font-size:11px;color:var(--tx3);margin-bottom:3px">${r.name} · ${fmt(r.date)}</div><div style="font-size:13px;color:var(--tx)">${r.text}</div></div>`).join('') : '<div class="empty">응답이 없습니다</div>';
+  openIvDetailModal(`${title} (${responses.length}건)`, body);
+}
+function showIvAllTextModal(){
+  const ivs = CUR_IV_SCOPE || DB.interviews || [];
+  const body = IV_TEXT_KEYS.map(tk=>{
+    const responses=ivs.filter(iv=>iv[tk.key]&&String(iv[tk.key]).trim());
+    if(!responses.length) return '';
+    return `<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:var(--ac);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--bd)">${tk.title} (${responses.length}건)</div>${responses.map(iv=>{const inst=DB.insts.find(i=>i.id===iv.iid);return `<div style="padding:6px 10px;background:var(--sf2);border-radius:6px;margin-bottom:5px"><span style="font-size:10px;color:var(--tx3)">${inst?inst.name:'—'} · ${fmt(iv.date)}</span><div style="font-size:12px;color:var(--tx)">${iv[tk.key]}</div></div>`;}).join('')}</div>`;
+  }).join('') || '<div class="empty">주관식 응답이 없습니다</div>';
+  openIvDetailModal('전체 주관식 누적 응답', body);
+}
+function openIvDetailModal(title, bodyHtml){
+  document.getElementById('sov-iv-detail-title').textContent=title;
+  document.getElementById('sov-iv-detail-body').innerHTML=bodyHtml;
+  openSov('sov-iv-detail');
 }
 
 /* ═══ 6. BACKUP & RESTORE ═══ */
