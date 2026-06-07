@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storyline — 현장 인터뷰 전용 시스템</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══ DESIGN SYSTEM ═══ */
+:root{
+  --bg:#F4F6FA;--sf:#FFFFFF;--sf2:#F8F9FC;--sf3:#EEF1F7;
+  --bd:#E2E8F0;--bd2:#CBD5E1;
+  --tx:#1E293B;--tx2:#475569;--tx3:#94A3B8;
+  --ac:#3B6FE8;--ac2:#6D4AFF;
+  --g:#16A34A;--gb:rgba(22,163,74,.1);
+  --am:#D97706;--amb:rgba(217,119,6,.1);
+  --rd:#DC2626;--rdb:rgba(220,38,38,.1);
+  --bl:#2563EB;--blb:rgba(37,99,235,.1);
+  --pp:#7C3AED;--ppb:rgba(124,58,237,.1);
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:0 4px 16px rgba(0,0,0,.1);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.13);
+  --sw:240px;--th:54px;--r:8px;--rl:12px;--rxl:16px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{cursor:pointer;font-family:inherit;border:none;background:none}
+input,select,textarea{font-family:inherit;font-size:13px;color:var(--tx)}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--sf3)}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--tx3)}
+
+/* LAYOUT */
+#app{display:flex;height:100vh;overflow:hidden}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.content{flex:1;overflow-y:auto;padding:22px}
+
+/* SIDEBAR */
+.sidebar{width:var(--sw);background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;box-shadow:var(--shadow)}
+.sb-brand{padding:18px 16px 14px;border-bottom:1px solid var(--bd);background:linear-gradient(135deg,#f8faff 0%,#eef3ff 100%)}
+.sb-logo{font-size:14px;font-weight:800;letter-spacing:-.5px;display:flex;align-items:center;gap:9px;color:var(--tx)}
+.sb-logo-ico{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--ac),var(--ac2));display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.sb-sub{font-size:10px;color:var(--tx3);margin-top:2px;padding-left:39px}
+.sb-sec{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);padding:14px 16px 4px}
+.sb-nav{padding:2px 8px}
+.ni{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border-radius:var(--r);font-size:13px;color:var(--tx2);transition:all .15s;text-align:left;position:relative;font-weight:500}
+.ni:hover{background:linear-gradient(90deg,rgba(59,111,232,.07),transparent);color:var(--tx)}
+.ni.active{background:linear-gradient(90deg,rgba(59,111,232,.12),rgba(59,111,232,.04));color:var(--bl)}
+.ni.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--bl);border-radius:0 3px 3px 0}
+.ni svg{width:15px;height:15px;flex-shrink:0;opacity:.6}
+.ni.active svg{opacity:1}
+.sb-footer{margin-top:auto;padding:13px 16px;border-top:1px solid var(--bd);font-size:11px;color:var(--tx3);display:flex;align-items:center;gap:8px}
+
+/* TOPBAR */
+.topbar{height:var(--th);background:linear-gradient(90deg,#fff 0%,#fafbff 100%);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 22px;gap:9px;flex-shrink:0;box-shadow:0 1px 0 var(--bd),0 2px 8px rgba(0,0,0,.04)}
+.tb-title{font-size:15px;font-weight:700;letter-spacing:-.3px;color:var(--tx)}
+.sp{flex:1}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);font-size:13px;font-weight:500;transition:all .15s;cursor:pointer;white-space:nowrap}
+.btn-p{background:var(--ac);color:#fff;box-shadow:0 2px 8px rgba(59,111,232,.25)}
+.btn-p:hover{background:#2d5fd4;transform:translateY(-1px);box-shadow:0 4px 14px rgba(59,111,232,.35)}
+.btn-g{background:var(--sf);color:var(--tx2);border:1px solid var(--bd2);box-shadow:var(--shadow)}
+.btn-g:hover{background:var(--sf3);color:var(--tx)}
+.btn-d{background:var(--rdb);color:var(--rd);border:1px solid rgba(220,38,38,.2)}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-xs{padding:3px 8px;font-size:11px;border-radius:5px}
+
+/* PAGES */
+.page{display:none}
+.page.active{display:flex;flex-direction:column;flex:1;overflow:hidden;animation:fi .2s ease}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* STAT CARDS */
+.sc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:18px 20px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.sc-lb{font-size:11px;color:var(--tx3);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.sc-v{font-size:28px;font-weight:800;letter-spacing:-1.5px;line-height:1}
+.sc-v.c-ac{color:var(--ac)}.sc-v.c-g{color:var(--g)}.sc-v.c-am{color:var(--am)}.sc-v.c-rd{color:var(--rd)}
+.sc-s{font-size:11px;color:var(--tx3);margin-top:6px;display:flex;align-items:center;gap:4px}
+
+/* PANELS & TABLE */
+.panel{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow);border-top:2px solid transparent}
+.panel:hover{border-top-color:var(--ac)}
+.ph{padding:13px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px;background:var(--sf)}
+.pt{font-size:13px;font-weight:600;color:var(--tx)}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:500px}
+thead th{padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--bd);background:var(--sf2);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--bd);font-size:13px;vertical-align:middle;color:var(--tx)}
+tbody tr:hover td{background:rgba(59,111,232,.04)}
+.tl{color:var(--bl);cursor:pointer;font-weight:500}
+.tl:hover{text-decoration:underline}
+
+/* BADGES & BAR CHARTS */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;letter-spacing:.2px;white-space:nowrap}
+.bcr{margin:8px 0}
+.bcr-l{display:flex;justify-content:space-between;font-size:12px;color:var(--tx2);margin-bottom:4px}
+.bcr-t{background:var(--sf3);border-radius:3px;height:7px;overflow:hidden}
+.bcr-f{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.16,1,.3,1)}
+
+/* MODALS */
+.sov{position:fixed;inset:0;background:rgba(0,0,0,.3);backdrop-filter:blur(4px);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.sov.open{opacity:1;pointer-events:all}
+.sm{background:var(--sf);border:1px solid var(--bd2);border-radius:var(--rxl);width:min(620px,96vw);max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);transform:scale(.97) translateY(10px);transition:transform .25s}
+.sov.open .sm{transform:scale(1) translateY(0)}
+.smh{padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--sf);z-index:1}
+.smt{font-size:15px;font-weight:700}
+.smb{padding:18px 20px}
+.smf{padding:12px 20px;border-top:1px solid var(--bd);display:flex;gap:8px;justify-content:flex-end;background:var(--sf2)}
+.sm-wide{width:min(900px,96vw)}
+.mcl{width:28px;height:28px;border-radius:var(--r);background:var(--sf3);border:1px solid var(--bd);color:var(--tx2);font-size:17px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer}
+
+/* FORMS */
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.fl{font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px}
+.fin,.fse{padding:8px 11px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx);font-size:13px;width:100%}
+.fin:focus,.fse:focus,.fta:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px rgba(59,111,232,.1)}
+.fta{padding:8px 11px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx);font-size:13px;resize:vertical;min-height:85px;line-height:1.6;width:100%}
+
+/* INTERVIEW FORM SPECIFICS */
+.iv-section{margin-bottom:22px;padding-bottom:20px;border-bottom:1px solid var(--bd)}
+.iv-section:last-child{border-bottom:none}
+.iv-section-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--ac);color:#fff;font-size:12px;font-weight:800;flex-shrink:0;margin-right:8px}
+.iv-section-title{font-size:14px;font-weight:700;color:var(--tx);display:flex;align-items:center;margin-bottom:14px}
+.iv-q{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:8px;display:flex;align-items:flex-start;gap:6px}
+.iv-q::before{content:'■';color:var(--ac);font-size:10px;margin-top:3px;flex-shrink:0}
+.iv-opts{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.iv-cb-wrap{display:flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--bd2);border-radius:6px;cursor:pointer;font-size:12px;color:var(--tx2);background:var(--sf)}
+.iv-cb-wrap input{accent-color:var(--ac);width:13px;height:13px;cursor:pointer}
+.iv-cb-wrap.checked{background:var(--blb);border-color:var(--bl);color:var(--bl);font-weight:600}
+.iv-radio-wrap{display:flex;gap:10px;margin-bottom:10px}
+.iv-radio-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border:1.5px solid var(--bd2);border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;background:var(--sf)}
+.iv-radio-btn.temp-good{border-color:var(--g);color:var(--g);background:var(--gb)}
+.iv-radio-btn.temp-mid{border-color:var(--am);color:var(--am);background:var(--amb)}
+.iv-radio-btn.temp-bad{border-color:var(--rd);color:var(--rd);background:var(--rdb)}
+.temp-dot{width:12px;height:12px;border-radius:50%;display:inline-block;flex-shrink:0}
+.temp-good-dot{background:var(--g)}.temp-mid-dot{background:var(--am)}.temp-bad-dot{background:var(--rd)}
+.iv-meta-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.iv-stat-section{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.iv-stat-title{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bd)}
+.iv-kw-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;margin:3px;cursor:default}
+
+/* TOAST & EMPTY */
+#toasts{position:fixed;bottom:20px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:7px}
+.toast{padding:11px 16px;border-radius:var(--rl);font-size:13px;font-weight:500;max-width:320px;transform:translateY(12px) scale(.96);opacity:0;transition:all .3s ease;display:flex;align-items:center;gap:7px;box-shadow:var(--shadow-md);background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46}
+.toast.show{transform:none;opacity:1}
+.empty{text-align:center;padding:32px 16px;color:var(--tx3);font-size:13px}
+
+@media print{
+  .sidebar,.topbar,#toasts{display:none!important}
+  #app{display:block!important}
+  .main{display:block!important}
+  .page.active{display:block!important;overflow:visible!important}
+  .content{overflow:visible!important;padding:0!important}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+<nav class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo"><div class="sb-logo-ico">📝</div>Storyline</div>
+    <div class="sb-sub">현장 인터뷰 전용 (Plan B)</div>
+  </div>
+  <div class="sb-sec">Menu</div>
+  <div class="sb-nav">
+    <button class="ni active" onclick="nav('dashboard',this)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>대시보드
+    </button>
+    <button class="ni" onclick="nav('interview-results',this)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 3h14v1H1V3zm2 3h10v1H3V6zm-2 3h14v1H1V9zm2 3h7v1H3v-1z"/></svg>인터뷰 결과 리포트
+    </button>
+  </div>
+  <div style="margin-top:auto;padding:16px">
+    <button class="btn btn-p" style="width:100%;justify-content:center" onclick="openAddIv()">+ 새 인터뷰 작성</button>
+  </div>
+  <div class="sb-nav" style="border-top:1px solid var(--bd);padding-top:10px;margin-bottom:10px">
+    <button class="ni" onclick="openSov('sov-backup')" style="font-size:12px;color:var(--tx3)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 2v5l3 3-1 1-3.5-3.5V3H8z" opacity=".3"/><path d="M2 10H0v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4h-2v4H2v-4zm6-9L4 5h3v5h2V5h3L8 1z"/></svg>
+      데이터 백업 / 본서버 연동
+    </button>
+  </div>
+</nav>
+
+<div class="main">
+
+<div class="page active" id="page-dashboard">
+  <div class="topbar"><span class="tb-title">인터뷰 대시보드</span></div>
+  <div class="content">
+    <div id="dash-summary"></div>
+    <div class="panel" style="margin-top:14px">
+      <div class="ph"><span class="pt">최근 등록된 인터뷰</span><div class="sp"></div><button class="btn btn-g btn-sm" onclick="nav('interview-results', document.querySelectorAll('.ni')[1])">전체 보기 →</button></div>
+      <div class="tw"><table>
+        <thead><tr><th>일시</th><th>기관명</th><th>연차</th><th>진행자</th><th>온도체크</th></tr></thead>
+        <tbody id="dash-recent-list"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-interview-results">
+  <div class="topbar">
+    <span class="tb-title">인터뷰(실태조사) 결과 리포트</span>
+    <div class="sp"></div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx3)">
+      <span>기간</span>
+      <input type="date" id="iv-filter-start" class="fin" style="font-size:12px;padding:5px 10px;width:130px" onchange="renderInterviewResults()">
+      <span>~</span>
+      <input type="date" id="iv-filter-end" class="fin" style="font-size:12px;padding:5px 10px;width:130px" onchange="renderInterviewResults()">
+    </div>
+    <button class="btn btn-g btn-sm" onclick="window.print()">🖨️ 인쇄/PDF</button>
+  </div>
+  <div class="content">
+    <div id="iv-results-summary"></div>
+    <div id="iv-results-charts"></div>
+    <div id="iv-results-keywords"></div>
+    <div id="iv-results-list"></div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<div class="sov" id="sov-iv-add">
+  <div class="sm sm-wide">
+    <div class="smh"><span class="smt">현장 인터뷰(실태조사) 등록</span><button class="mcl" onclick="closeSov('sov-iv-add')">×</button></div>
+    <div class="smb">
+      <div style="background:var(--blb);border:1px solid rgba(37,99,235,.2);border-radius:var(--r);padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--tx2)">
+        💡 <strong>기관명이 DB에 없어도 괜찮습니다!</strong> 새로운 기관 이름을 적고 저장하시면 시스템이 알아서 새 기관을 생성하여 연결합니다.
+      </div>
+      
+      <div class="iv-section">
+        <div class="iv-section-title"><span class="iv-section-num">1</span>기본 정보</div>
+        <div class="iv-meta-grid">
+          <div class="iv-meta-cell">
+            <label>기관명 (직접 입력) *</label>
+            <input type="text" id="iv_inst_name" list="inst-list" placeholder="기관명 입력 (자동완성 지원)">
+            <datalist id="inst-list"></datalist>
+          </div>
+          <div class="iv-meta-cell"><label>인터뷰 일시 *</label><input type="date" id="iv_date"></div>
+          <div class="iv-meta-cell">
+            <label>스토리라인 연차 *</label>
+            <select id="iv_years">
+              <option value="">선택하세요</option>
+              <option value="1년차">1년차</option><option value="2년차">2년차</option>
+              <option value="3년차">3년차</option><option value="4년차">4년차</option><option value="5년차+">5년차+</option>
+            </select>
+          </div>
+          <div class="iv-meta-cell">
+            <label>인터뷰 진행자 *</label>
+            <select id="iv_interviewer">
+              <option value="">선택하세요</option>
+              <option value="김민지">김민지</option><option value="김지은">김지은</option>
+              <option value="이경윤">이경윤</option><option value="안지훈">안지훈</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div id="iv-dynamic-form"></div>
+    </div>
+    <div class="smf"><button class="btn btn-g" onclick="closeSov('sov-iv-add')">취소</button><button class="btn btn-p" onclick="saveInterview()">저장</button></div>
+  </div>
+</div>
+
+<div class="sov" id="sov-backup">
+  <div class="sm">
+    <div class="smh"><span class="smt">💾 데이터 백업 / 본서버 연동</span><button class="mcl" onclick="closeSov('sov-backup')">×</button></div>
+    <div class="smb">
+      <div style="margin-bottom:18px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px">1. 데이터 내보내기 (백업)</div>
+        <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">현재 이곳(Plan B)에 작성한 인터뷰 및 기관 데이터를 JSON 파일로 다운로드합니다. 이 파일을 나중에 정식 서버에서 '가져오기' 하시면 됩니다.</div>
+        <button class="btn btn-p" onclick="backupData()">📥 JSON 파일 다운로드</button>
+      </div>
+      <div style="border-top:1px solid var(--bd);padding-top:18px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px">2. 데이터 복원 / 가져오기</div>
+        <div style="font-size:12px;color:var(--rd);margin-bottom:10px">⚠️ 주의: 가져오기를 실행하면 현재 데이터가 파일의 데이터로 완전히 교체됩니다.</div>
+        <label class="btn btn-g" style="cursor:pointer">📂 JSON 파일 업로드<input type="file" accept=".json" style="display:none" onchange="restoreData(event)"></label>
+      </div>
+    </div>
+    <div class="smf"><button class="btn btn-g" onclick="closeSov('sov-backup')">닫기</button></div>
+  </div>
+</div>
+
+<div class="sov" id="sov-iv-detail">
+  <div class="sm"><div class="smh"><span class="smt" id="sov-iv-detail-title"></span><button class="mcl" onclick="closeSov('sov-iv-detail')">×</button></div><div class="smb" id="sov-iv-detail-body" style="padding:0;max-height:60vh;overflow-y:auto"></div><div class="smf"><button class="btn btn-g" onclick="closeSov('sov-iv-detail')">닫기</button></div></div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+/* ═══ 1. DATA INITIALIZATION (NO SEED DATA) ═══ */
+const KEY = 'slcrm_v9_multi'; // 본 서버와 동일한 키 사용으로 미래 호환성 확보
+
+let DB = { seq: 1000, insts: [], interviews: [] };
+
+function loadDB() {
+  const d = JSON.parse(localStorage.getItem(KEY));
+  if (d) { DB = d; }
+  if (!DB.insts) DB.insts = [];
+  if (!DB.interviews) DB.interviews = [];
+  if (!DB.seq) DB.seq = 1000;
+}
+function save() { localStorage.setItem(KEY, JSON.stringify(DB)); }
+function uid() { return 'x' + (DB.seq++) + '_' + Date.now(); }
+function today() { return new Date().toISOString().slice(0,10); }
+function fmt(d) { return d ? d.replace(/-/g, '.') : '—'; }
+
+/* ═══ 2. INTERVIEW QUESTION DEFINITIONS ═══ */
+const IV_YEARS_POOL = ['1년차','2년차','3년차','4년차','5년차+'];
+const IV_Q = {
+  q2_goal: {label:'스토리라인 도입 목적(초기 기대)은 무엇이었나요?', opts:['영유아 이해','부모 상담','교사 업무 경감','운영 마케팅','교사 전문성 향상'], hasEtc:true},
+  q2_satisfy:{label:'가장 만족하는 부분은 무엇인가요?', opts:['영유아 이해','부모 상담','교사 업무 경감','운영 마케팅','교사 전문성 향상'], hasEtc:true},
+  q2_regret: {label:'가장 아쉬운 부분은 무엇인가요?', opts:['비쥬얼 데이터 관련','쌍둥이 송출','리포트 정확성','리포트 활용성','어플 및 웹사이트 기능'], hasEtc:true},
+  q2_data_use:{label:'데이터/리포트를 상담 외에 활용하고 있는 부분이 있나요?', opts:['관찰일지','포트폴리오','부모 발송용 자료','프로젝트 수업'], hasEtc:true, hasNone:true},
+  q2_parent_app:{label:'부모용 어플을 활용하고 있나요?', opts:['적극적으로 사용 중','선택적 활용 중','사용 안함'], single:true, reasonOn:['선택적 활용 중','사용 안함']},
+  q3_edu_programs:{label:'참여하신 교육 프로그램은 무엇인가요?', opts:['시스템 등록 교육','시스템 이해 교육','90일 즐기기 교육(1)','90일 즐기기 교육(2)','4월 리포트 교육','9월 리포트 교육','1월 리포트 교육'], hasEtc:true},
+  q3_consult_need:{label:'추가로 필요한 컨설팅이 있다면 적어주세요.', type:'text'},
+  q3_refer:{label:'타 기관 추천 의향 및 추천 기관이 있나요?', opts:['있음','없음'], single:true},
+  q3_refer_who:{label:'추천 기관명을 적어주세요.', type:'text'},
+  q3_feature_need:{label:'장기 활용을 위해 꼭 추가되었으면 하는 기능은?', type:'text'},
+  q3_parent_sat:{label:'학부모 만족도 체감 정도는?', opts:['매우 만족','만족','보통','불만족','매우 불만족'], single:true},
+  q4_alarm_intent:{label:'알림장 앱 출시 시, 사용 의향이 있나요?', opts:['있음','없음'], single:true},
+  q4_alarm_feature:{label:'알림장 앱 대체 시 꼭 필요한 기능은?', type:'text'},
+  q5_effect:{label:'교육·컨설팅 이후 도움이 된 부분이 있나요?', type:'text'},
+  q5_need_more:{label:'추가로 도움받고 싶은 부분이 있다면?', type:'text'},
+  q6_researcher_opinion:{label:'연구원 의견(교사 및 원장 특징)', type:'text'},
+  q6_temperature:{label:'기관 온도 체크', opts:['좋음','보통','위험'], single:true, isTemp:true},
+  q6_support_points:{label:'향후 지원 및 개선 필요 포인트', type:'text'},
+  q6_extra:{label:'추가 의견 및 특이사항', type:'text'},
+};
+const IV_SECTIONS = [
+  {num:2, title:'데이터/리포트 만족 및 활용', keys:['q2_goal','q2_satisfy','q2_regret','q2_data_use','q2_parent_app']},
+  {num:3, title:'실태 파악', keys:['q3_edu_programs','q3_consult_need','q3_refer','q3_refer_who','q3_feature_need','q3_parent_sat']},
+  {num:4, title:'스토리라인 2.0', keys:['q4_alarm_intent','q4_alarm_feature']},
+  {num:5, title:'교육 및 컨설팅 효과', keys:['q5_effect','q5_need_more']},
+  {num:6, title:'연구원 종합 의견', keys:['q6_researcher_opinion','q6_temperature','q6_support_points','q6_extra']},
+];
+const IV_CHART_KEYS = [
+  {key:'q2_goal', title:'2-1. 도입 목적'}, {key:'q2_satisfy', title:'2-2. 만족 부분'}, {key:'q2_regret', title:'2-3. 아쉬운 부분'}, {key:'q2_data_use', title:'2-4. 리포트 활용'},
+  {key:'q2_parent_app', title:'2-5. 부모용 어플'}, {key:'q3_edu_programs', title:'3-1. 참여 교육'}, {key:'q3_refer', title:'3-3. 추천 의향'}, {key:'q3_parent_sat', title:'3-5. 학부모 만족도'}, {key:'q4_alarm_intent', title:'4-1. 알림장 사용 의향'}
+];
+const IV_TEXT_KEYS = [
+  {key:'q3_consult_need', title:'3-2. 필요 컨설팅'}, {key:'q3_feature_need', title:'3-4. 필요 기능'}, {key:'q4_alarm_feature', title:'4-2. 알림장 필요 기능'},
+  {key:'q5_effect', title:'5-1. 교육 효과'}, {key:'q5_need_more', title:'5-2. 추가 도움'}, {key:'q6_researcher_opinion', title:'6-1. 연구원 의견'},
+  {key:'q6_support_points', title:'6-2. 지원 포인트'}, {key:'q6_extra', title:'6-3. 특이사항'}
+];
+
+/* ═══ 3. CORE LOGIC ═══ */
+window.onload = () => { loadDB(); nav('dashboard', document.querySelectorAll('.ni')[0]); };
+
+function nav(page, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.ni').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  if(page==='dashboard') renderDash();
+  if(page==='interview-results'){ IV_YEAR_FILTER=null; renderInterviewResults(); }
+}
+
+function openSov(id) { document.getElementById(id).classList.add('open'); }
+function closeSov(id) { document.getElementById(id).classList.remove('open'); }
+function toast(msg) {
+  const t = document.createElement('div'); t.className = 'toast show'; t.textContent = msg;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(() => { t.classList.remove('show'); setTimeout(()=>t.remove(),300); }, 2000);
+}
+
+// Datalist for autocomplete
+function updateInstDatalist() {
+  const dl = document.getElementById('inst-list');
+  if(dl) dl.innerHTML = DB.insts.map(i => `<option value="${i.name}">`).join('');
+}
+
+// Open Form
+function openAddIv() {
+  updateInstDatalist();
+  document.getElementById('iv_date').value = today();
+  document.getElementById('iv_inst_name').value = '';
+  document.getElementById('iv_years').value = '';
+  document.getElementById('iv_interviewer').value = '';
+  
+  const formHtml = IV_SECTIONS.map(sec=>`
+    <div class="iv-section">
+      <div class="iv-section-title"><span class="iv-section-num">${sec.num}</span>${sec.title}</div>
+      ${sec.keys.map(key=>renderIvQuestion(key)).join('')}
+    </div>`).join('');
+  document.getElementById('iv-dynamic-form').innerHTML = formHtml;
+  openSov('sov-iv-add');
+}
+
+function renderIvQuestion(key){
+  const q = IV_Q[key]; if(!q) return '';
+  if(q.type==='text'){
+    return `<div style="margin-bottom:12px"><div class="iv-q">${q.label}</div><textarea class="fta" id="iv_${key}" style="min-height:68px;font-size:12px" placeholder="${q.label} 입력..."></textarea></div>`;
+  }
+  if(q.isTemp){
+    return `<div style="margin-bottom:12px"><div class="iv-q">${q.label}</div><div class="iv-radio-wrap">
+      <label class="iv-radio-btn"><input type="radio" name="iv_temperature" value="좋음"> <span class="temp-dot temp-good-dot"></span> 좋음</label>
+      <label class="iv-radio-btn"><input type="radio" name="iv_temperature" value="보통"> <span class="temp-dot temp-mid-dot"></span> 보통</label>
+      <label class="iv-radio-btn"><input type="radio" name="iv_temperature" value="위험"> <span class="temp-dot temp-bad-dot"></span> 위험</label>
+    </div></div>`;
+  }
+  return `<div style="margin-bottom:12px"><div class="iv-q">${q.label} <span style="font-size:10px;color:var(--tx3);font-weight:400">${q.single?'(단일)':'(중복)'}</span></div>
+    <div class="iv-opts">
+      ${q.opts.map(opt=>`<label class="iv-cb-wrap"><input type="${q.single?'radio':'checkbox'}" name="iv_${key}" value="${opt}" onchange="updateIvCheck(this,'${key}','${q.single?'single':'multi'}')"> ${opt}</label>`).join('')}
+      ${q.hasNone?`<label class="iv-cb-wrap"><input type="checkbox" id="iv_${key}_none"> 없음</label>`:''}
+      ${q.hasEtc?`<label class="iv-cb-wrap is-etc"><input type="checkbox" value="기타" onchange="updateIvCheck(this,'${key}','multi')"> 기타 (직접 입력)</label>
+      <div class="iv-etc-inline" id="iv_etc_${key}_wrap" style="display:none"><input type="text" class="fin" id="iv_${key}_etc" placeholder="기타 내용 입력"></div>`:''}
+    </div>
+    ${q.reasonOn?`<div id="iv_reason_${key}_wrap" style="display:none;margin-top:8px"><input type="text" class="fin" id="iv_${key}_reason" placeholder="선택한 이유 입력"></div>`:''}
+    ${key==='q3_refer'?`<div id="iv_q3_refer_who_wrap" style="display:none;margin-top:6px"><input type="text" class="fin" id="iv_q3_refer_who" placeholder="추천 기관명 입력"></div>`:''}
+  </div>`;
+}
+
+function updateIvCheck(el, key, mode){
+  el.closest('.iv-cb-wrap').classList.toggle('checked', el.checked);
+  if(mode==='single'){
+    document.querySelectorAll(`[name="iv_${key}"]`).forEach(r=>{ r.closest('.iv-cb-wrap').classList.toggle('checked', r.checked); });
+  }
+  if(el.value==='기타'){ const w=document.getElementById('iv_etc_'+key+'_wrap'); if(w) w.style.display=el.checked?'':'none'; }
+  if(key==='q3_refer'){ const w=document.getElementById('iv_q3_refer_who_wrap'); if(w) w.style.display=(el.value==='있음'&&el.checked)?'':'none'; }
+  const q=IV_Q[key];
+  if(q&&q.reasonOn){ const w=document.getElementById('iv_reason_'+key+'_wrap'); if(w) w.style.display=(q.reasonOn.includes(el.value)&&el.checked)?'':'none'; }
+}
+
+function saveInterview(){
+  const instName = document.getElementById('iv_inst_name').value.trim();
+  const ivDate = document.getElementById('iv_date').value;
+  const ivYears = document.getElementById('iv_years').value;
+  const interviewer = document.getElementById('iv_interviewer').value;
+
+  if(!instName || !ivDate || !ivYears || !interviewer) { toast('기본 정보(기관명, 일시, 연차, 진행자)를 모두 입력해주세요.'); return; }
+
+  // 기관이 존재하는지 확인, 없으면 자동 생성
+  let inst = DB.insts.find(i => i.name === instName);
+  if(!inst){
+    inst = { id: uid(), name: instName, yr: parseInt(ivYears)||1, grade:'', branch:'미지정', region:'미지정', res:interviewer, hub:'N' };
+    DB.insts.push(inst);
+  }
+
+  const iv = { id: uid(), iid: inst.id, date: ivDate, iv_years: ivYears, interviewer: interviewer };
+
+  // 수집
+  IV_SECTIONS.forEach(sec=>{
+    sec.keys.forEach(key=>{
+      const q=IV_Q[key];
+      if(q.type==='text'){ iv[key] = document.getElementById('iv_'+key)?.value.trim()||''; return; }
+      if(q.isTemp){ const sel=document.querySelector('input[name="iv_temperature"]:checked'); iv[key]=sel?sel.value:''; return; }
+      
+      const checked = [...document.querySelectorAll(`input[name="iv_${key}"]:checked`)].map(e=>e.value);
+      iv[key] = q.single ? (checked[0]||'') : checked;
+      
+      if(q.hasEtc){ const e=document.getElementById('iv_'+key+'_etc'); if(e) iv[key+'_etc'] = e.value.trim(); }
+      if(q.hasNone){ const n=document.getElementById('iv_'+key+'_none'); if(n) iv[key+'_none'] = n.checked; }
+      if(q.reasonOn){ const r=document.getElementById('iv_'+key+'_reason'); if(r) iv[key+'_reason'] = r.value.trim(); }
+      if(key==='q3_refer'){ const rw=document.getElementById('iv_q3_refer_who'); if(rw) iv['q3_refer_who'] = rw.value.trim(); }
+    });
+  });
+
+  DB.interviews.push(iv);
+  save();
+  closeSov('sov-iv-add');
+  toast(`${inst.name} 인터뷰가 저장되었습니다.`);
+  nav('interview-results', document.querySelectorAll('.ni')[1]); // 결과창으로 이동
+}
+
+/* ═══ 4. RENDER DASHBOARD ═══ */
+function renderDash(){
+  const ivs = DB.interviews || [];
+  const total = ivs.length;
+  const ivG = ivs.filter(i=>i.q6_temperature==='좋음').length;
+  const ivM = ivs.filter(i=>i.q6_temperature==='보통').length;
+  const ivB = ivs.filter(i=>i.q6_temperature==='위험').length;
+
+  document.getElementById('dash-summary').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px">
+      <div class="sc"><div class="sc-lb">전체 등록된 인터뷰</div><div class="sc-v c-ac">${total}</div></div>
+      <div class="sc"><div class="sc-lb">온도 - 좋음</div><div class="sc-v c-g">${ivG}</div></div>
+      <div class="sc"><div class="sc-lb">온도 - 보통</div><div class="sc-v c-am">${ivM}</div></div>
+      <div class="sc"><div class="sc-lb">온도 - 위험</div><div class="sc-v c-rd">${ivB}</div></div>
+    </div>`;
+
+  const recent = [...ivs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0, 10);
+  document.getElementById('dash-recent-list').innerHTML = recent.length ? recent.map(iv=>{
+    const inst = DB.insts.find(i=>i.id===iv.iid);
+    const tempC = iv.q6_temperature==='좋음'?'var(--g)':iv.q6_temperature==='위험'?'var(--rd)':'var(--am)';
+    return `<tr>
+      <td style="font-size:11px;color:var(--tx3)">${fmt(iv.date)}</td>
+      <td style="font-weight:600">${inst?inst.name:'—'}</td>
+      <td>${iv.iv_years||'—'}</td>
+      <td>${iv.interviewer||'—'}</td>
+      <td style="color:${tempC};font-weight:600">${iv.q6_temperature||'—'}</td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="5"><div class="empty">등록된 인터뷰가 없습니다.<br>왼쪽 <b>'+ 새 인터뷰 작성'</b> 버튼을 눌러 시작하세요.</div></td></tr>`;
+}
+
+/* ═══ 5. RENDER RESULTS ═══ */
+let IV_YEAR_FILTER = null;
+function setIvYearFilter(y){ IV_YEAR_FILTER = (IV_YEAR_FILTER===y)?null:y; renderInterviewResults(); }
+
+function renderInterviewResults(){
+  let ivs = DB.interviews || [];
+  
+  // Date Filter
+  const sd=document.getElementById('iv-filter-start').value, ed=document.getElementById('iv-filter-end').value;
+  if(sd) ivs = ivs.filter(i=>i.date>=sd);
+  if(ed) ivs = ivs.filter(i=>i.date<=ed);
+
+  // Year Filter
+  const yc = {}; IV_YEARS_POOL.forEach(y=>yc[y]=0);
+  ivs.forEach(iv=>{ if(iv.iv_years) yc[iv.iv_years] = (yc[iv.iv_years]||0)+1; });
+  if(IV_YEAR_FILTER) ivs = ivs.filter(i=>i.iv_years===IV_YEAR_FILTER);
+
+  const total = ivs.length;
+  const sumEl = document.getElementById('iv-results-summary');
+  sumEl.innerHTML = `<div style="margin-bottom:16px;display:flex;gap:6px;flex-wrap:wrap">
+    <button class="btn btn-xs ${!IV_YEAR_FILTER?'btn-p':'btn-g'}" onclick="setIvYearFilter(null)">전체보기 (${(DB.interviews||[]).length})</button>
+    ${IV_YEARS_POOL.map(y=>`<button class="btn btn-xs ${IV_YEAR_FILTER===y?'btn-p':'btn-g'}" onclick="setIvYearFilter('${y}')">${y}: ${yc[y]}개</button>`).join('')}
+  </div>`;
+
+  if(total===0){
+    document.getElementById('iv-results-charts').innerHTML = '<div class="empty panel" style="padding:40px">조건에 맞는 데이터가 없습니다.</div>';
+    document.getElementById('iv-results-list').innerHTML=''; return;
+  }
+
+  // Charts
+  const chartHtml = IV_CHART_KEYS.map(ck=>{
+    const q=IV_Q[ck.key]; const opts=q.hasEtc?[...q.opts,'기타']:q.opts;
+    const counts={}; opts.forEach(o=>counts[o]=0);
+    ivs.forEach(iv=>{ const v=iv[ck.key]; if(Array.isArray(v)) v.forEach(o=>{if(counts[o]!==undefined)counts[o]++;}); else if(v&&counts[v]!==undefined) counts[v]++; });
+    const totR = ivs.filter(iv=>{const v=iv[ck.key];return Array.isArray(v)?v.length>0:Boolean(v);}).length;
+    
+    return `<div class="iv-stat-section">
+      <div class="iv-stat-title">${ck.title} <span style="font-weight:400;font-size:10px;color:var(--tx3)">(응답 ${totR}건)</span></div>
+      ${opts.map((opt,i)=>{
+        const c=counts[opt]||0, p=totR?Math.round(c/totR*100):0;
+        return`<div class="bcr"><div class="bcr-l"><span style="font-size:11px">${opt}</span><span style="font-size:10px">${c}건 (${p}%)</span></div><div class="bcr-t"><div class="bcr-f" style="width:${Math.max(p,c>0?2:0)}%;background:var(--ac)"></div></div></div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+
+  // Texts
+  const textHtml = IV_TEXT_KEYS.map(tk=>{
+    const resp = ivs.filter(iv=>iv[tk.key]&&String(iv[tk.key]).trim());
+    const list = resp.slice(0,5).map(r=>{
+      const inst=DB.insts.find(i=>i.id===r.iid);
+      return `<div style="padding:6px 10px;background:var(--sf2);border-radius:6px;margin-bottom:5px"><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">${inst?inst.name:'—'}</div><div style="font-size:12px;color:var(--tx)">${r[tk.key]}</div></div>`;
+    }).join('');
+    return `<div class="iv-stat-section"><div class="iv-stat-title">${tk.title} (${resp.length}건)</div>${list||'<div class="empty" style="padding:10px">응답 없음</div>'}</div>`;
+  }).join('');
+
+  document.getElementById('iv-results-charts').innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">${chartHtml}${textHtml}</div>`;
+
+  // List
+  const rows = ivs.sort((a,b)=>b.date.localeCompare(a.date)).map(iv=>{
+    const inst=DB.insts.find(i=>i.id===iv.iid);
+    return `<tr><td style="font-size:11px">${fmt(iv.date)}</td><td style="font-weight:600">${inst?inst.name:'—'}</td><td>${iv.iv_years||'—'}</td><td>${iv.interviewer||'—'}</td><td>${iv.q6_temperature||'—'}</td></tr>`;
+  }).join('');
+  document.getElementById('iv-results-list').innerHTML = `<div class="panel" style="margin-top:14px"><div class="ph"><span class="pt">인터뷰 목록</span></div><div class="tw"><table><thead><tr><th>일시</th><th>기관명</th><th>연차</th><th>진행자</th><th>온도</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+
+/* ═══ 6. BACKUP & RESTORE ═══ */
+function backupData(){
+  const json=JSON.stringify(DB,null,2);
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([json],{type:'application/json'}));
+  a.download=`storyline_interview_planB_${today()}.json`;
+  a.click();
+  toast('데이터 백업 완료');
+}
+function restoreData(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data.insts || !data.interviews){toast('유효하지 않은 파일입니다');return;}
+      DB=data; save();
+      closeSov('sov-backup');
+      toast('데이터 복원 완료! 화면을 새로고침합니다.');
+      setTimeout(()=>location.reload(), 1000);
+    }catch(err){toast('파일 오류');}
+  };
+  reader.readAsText(file,'utf-8');
+  event.target.value='';
+}
+
+</script>
+</body>
+</html>
